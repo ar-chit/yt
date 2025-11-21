@@ -56,7 +56,7 @@ const VideosSectionSuspense = () => {
                     {video.title}
                   </TableCell>
                   <TableCell>
-                    visiblity
+                    visibility
                   </TableCell>
                   <TableCell>
                     status
