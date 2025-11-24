@@ -1,15 +1,15 @@
 "use client";
 
-import { Suspense } from "react";
 import { useRouter } from "next/navigation";
+import { Suspense } from "react";
 import { ErrorBoundary } from "react-error-boundary";
 
-import { trpc } from "@/trpc/client";
 import { FilterCarousel } from "@/components/filter-carousel";
+import { trpc } from "@/trpc/client";
 
 interface CategoriesSectionProps {
   categoryId?: string;
-};
+}
 
 export const CategoriesSection = ({ categoryId }: CategoriesSectionProps) => {
   return (
@@ -18,11 +18,11 @@ export const CategoriesSection = ({ categoryId }: CategoriesSectionProps) => {
         <CategoriesSectionSuspense categoryId={categoryId} />
       </ErrorBoundary>
     </Suspense>
-  )
-}
+  );
+};
 
 const CategoriesSkeleton = () => {
-  return <FilterCarousel isLoading data={[]} onSelect={() => {}} />
+  return <FilterCarousel isLoading data={[]} onSelect={() => {}} />;
 };
 
 const CategoriesSectionSuspense = ({ categoryId }: CategoriesSectionProps) => {
@@ -46,5 +46,5 @@ const CategoriesSectionSuspense = ({ categoryId }: CategoriesSectionProps) => {
     router.push(url.toString());
   };
 
-  return <FilterCarousel onSelect={onSelect} value={categoryId} data={data} />
+  return <FilterCarousel onSelect={onSelect} value={categoryId} data={data} />;
 };

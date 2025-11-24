@@ -2,7 +2,7 @@ import { CategoriesSection } from "../sections/categories-section";
 
 interface HomeViewProps {
   categoryId?: string;
-};
+}
 
 export const HomeView = ({ categoryId }: HomeViewProps) => {
   return (

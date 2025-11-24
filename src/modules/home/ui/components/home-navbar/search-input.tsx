@@ -1,4 +1,4 @@
-import { SearchIcon } from "lucide-react"
+import { SearchIcon } from "lucide-react";
 
 export const SearchInput = () => {
   // TODO: Add search functionality
@@ -20,5 +20,5 @@ export const SearchInput = () => {
         <SearchIcon className="size-5" />
       </button>
     </form>
-  )
-}
+  );
+};

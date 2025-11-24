@@ -1,9 +1,9 @@
 "use client";
 
-import { ClapperboardIcon, UserCircleIcon } from "lucide-react"
-import { UserButton, SignInButton, SignedIn, SignedOut } from "@clerk/nextjs";
+import { SignInButton, SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
+import { ClapperboardIcon, UserCircleIcon } from "lucide-react";
 
-import { Button } from "@/components/ui/button"
+import { Button } from "@/components/ui/button";
 
 export const AuthButton = () => {
   return (
@@ -33,5 +33,5 @@ export const AuthButton = () => {
         </SignInButton>
       </SignedOut>
     </>
-  )
-}
+  );
+};

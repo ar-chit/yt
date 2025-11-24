@@ -5,7 +5,7 @@ import { StudioSidebar } from "../components/studio-sidebar";
 
 interface StudioLayoutProps {
   children: React.ReactNode;
-};
+}
 
 export const StudioLayout = ({ children }: StudioLayoutProps) => {
   return (
@@ -14,9 +14,7 @@ export const StudioLayout = ({ children }: StudioLayoutProps) => {
         <StudioNavbar />
         <div className="flex min-h-screen pt-[4rem]">
           <StudioSidebar />
-          <main className="flex-1 overflow-y-auto">
-            {children}
-          </main>
+          <main className="flex-1 overflow-y-auto">{children}</main>
         </div>
       </div>
     </SidebarProvider>

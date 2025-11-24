@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 
-import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import {
   Carousel,
@@ -13,6 +12,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
 
 interface FilterCarouselProps {
   value?: string | null;
@@ -46,7 +46,7 @@ export const FilterCarousel = ({
       setCurrent(api.selectedScrollSnap() + 1);
     });
   }, [api]);
-  
+
   return (
     <div className="relative w-full">
       {/* Left fade */}
@@ -72,36 +72,36 @@ export const FilterCarousel = ({
               className="pl-3 basis-auto"
             >
               <Badge
-                variant={!value ? "default" :"secondary"}
+                variant={!value ? "default" : "secondary"}
                 className="rounded-lg px-3 py-1 cursor-pointer whitespace-nowrap text-sm"
               >
                 All
               </Badge>
             </CarouselItem>
           )}
-          {isLoading && 
+          {isLoading &&
             Array.from({ length: 14 }).map((_, index) => (
               <CarouselItem key={index} className="pl-3 basis-auto">
                 <Skeleton className="rounded-lg px-3 py-1 h-full text-sm w-[100px] font-semibold">
                   &nbsp;
                 </Skeleton>
               </CarouselItem>
-            ))
-          }
-          {!isLoading && data.map((item) => (
-            <CarouselItem 
-              key={item.value} 
-              className="pl-3 basis-auto" 
-              onClick={() => onSelect(item.value)}
-            >
-              <Badge
-                variant={value === item.value ? "default" : "secondary"}
-                className="rounded-lg px-3 py-1 cursor-pointer whitespace-nowrap text-sm"
+            ))}
+          {!isLoading &&
+            data.map((item) => (
+              <CarouselItem
+                key={item.value}
+                className="pl-3 basis-auto"
+                onClick={() => onSelect(item.value)}
               >
-                {item.label}
-              </Badge>
-            </CarouselItem>
-          ))}
+                <Badge
+                  variant={value === item.value ? "default" : "secondary"}
+                  className="rounded-lg px-3 py-1 cursor-pointer whitespace-nowrap text-sm"
+                >
+                  {item.label}
+                </Badge>
+              </CarouselItem>
+            ))}
         </CarouselContent>
         <CarouselPrevious className="left-0 z-20" />
         <CarouselNext className="right-0 z-20" />
@@ -115,5 +115,5 @@ export const FilterCarousel = ({
         )}
       />
     </div>
-  )
-}
+  );
+};

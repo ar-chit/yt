@@ -1,16 +1,16 @@
 "use client";
 
-import Link from "next/link";
 import { useAuth, useClerk } from "@clerk/nextjs";
 import { HistoryIcon, ListVideoIcon, ThumbsUpIcon } from "lucide-react";
+import Link from "next/link";
 
-import { 
-  SidebarGroup, 
-  SidebarGroupContent, 
-  SidebarGroupLabel, 
-  SidebarMenu, 
-  SidebarMenuButton, 
-  SidebarMenuItem
+import {
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
 const items = [
@@ -66,5 +66,5 @@ export const PersonalSection = () => {
         </SidebarMenu>
       </SidebarGroupContent>
     </SidebarGroup>
-  )
-}
+  );
+};

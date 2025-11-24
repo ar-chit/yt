@@ -1,9 +1,14 @@
-import Link from "next/link";
 import { useUser } from "@clerk/nextjs";
+import Link from "next/link";
 
+import {
+  SidebarHeader,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  useSidebar,
+} from "@/components/ui/sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { UserAvatar } from "@/components/user-avatar";
-import { SidebarHeader, SidebarMenuItem, SidebarMenuButton, useSidebar } from "@/components/ui/sidebar";
 
 export const StudioSidebarHeader = () => {
   const { user } = useUser();
@@ -18,7 +23,7 @@ export const StudioSidebarHeader = () => {
           <Skeleton className="h-4 w-[100px]" />
         </div>
       </SidebarHeader>
-    )
+    );
   }
 
   if (state === "collapsed") {
@@ -35,7 +40,7 @@ export const StudioSidebarHeader = () => {
           </Link>
         </SidebarMenuButton>
       </SidebarMenuItem>
-    )
+    );
   }
 
   return (
@@ -48,12 +53,8 @@ export const StudioSidebarHeader = () => {
         />
       </Link>
       <div className="flex flex-col items-center mt-2 gap-y-1">
-        <p className="text-sm font-medium">
-          Your profile
-        </p>
-        <p className="text-xs text-muted-foreground">
-          {user.fullName}
-        </p>
+        <p className="text-sm font-medium">Your profile</p>
+        <p className="text-xs text-muted-foreground">{user.fullName}</p>
       </div>
     </SidebarHeader>
   );

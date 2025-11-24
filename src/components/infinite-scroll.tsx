@@ -8,7 +8,7 @@ interface InfiniteScrollProps {
   hasNextPage: boolean;
   isFetchingNextPage: boolean;
   fetchNextPage: () => void;
-};
+}
 
 export const InfiniteScroll = ({
   isManual = false,
@@ -25,7 +25,13 @@ export const InfiniteScroll = ({
     if (isIntersecting && hasNextPage && !isFetchingNextPage && !isManual) {
       fetchNextPage();
     }
-  }, [isIntersecting, hasNextPage, isFetchingNextPage, isManual, fetchNextPage]);
+  }, [
+    isIntersecting,
+    hasNextPage,
+    isFetchingNextPage,
+    isManual,
+    fetchNextPage,
+  ]);
 
   return (
     <div className="flex flex-col items-center gap-4 p-4">
