@@ -10,7 +10,7 @@ export const studioRouter = createTRPCRouter({
   getOne: protectedProcedure
     .input(
       z.object({
-        id: z.string().uuid(),
+        id: z.uuid(),
       })
     )
     .query(async ({ ctx, input }) => {
@@ -21,6 +21,8 @@ export const studioRouter = createTRPCRouter({
         .select()
         .from(videos)
         .where(and(eq(videos.id, id), eq(videos.userId, userId)));
+      
+      console.log({ video });
 
       if (!video) {
         throw new TRPCError({
