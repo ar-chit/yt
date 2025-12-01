@@ -12,7 +12,7 @@ export const HomeLayout = ({ children }: HomeLayoutProps) => {
     <SidebarProvider>
       <div className="w-full">
         <HomeNavbar />
-        <div className="flex min-h-screen pt-[4rem]">
+        <div className="flex min-h-screen pt-16">
           <HomeSidebar />
           <main className="flex-1 overflow-y-auto">{children}</main>
         </div>
