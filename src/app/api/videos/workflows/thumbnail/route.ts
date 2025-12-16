@@ -1,8 +1,10 @@
 import { db } from "@/db";
 import { videos } from "@/db/schema";
+import { base64ToFile } from "@/lib/utils";
 import { serve } from "@upstash/workflow/nextjs";
 import { and, eq } from "drizzle-orm";
 import OpenAI from "openai";
+import { UTApi } from "uploadthing/server";
 
 interface InputType {
   userId: string;
@@ -11,6 +13,7 @@ interface InputType {
 }
 
 export const { POST } = serve(async (context) => {
+  const utapi = new UTApi();
   const input = context.requestPayload as InputType;
   const { videoId, userId, prompt } = input;
 
@@ -27,38 +30,75 @@ export const { POST } = serve(async (context) => {
     return existingVideo;
   });
 
-  const body = await context.run("generate-thumbnail", async () => {
-    const openai = new OpenAI();
-    const response = await openai.responses.create({
-      model: "gpt-5",
-      input: prompt,
-      tools: [{
-        type: "image_generation",
-        size: "1536x1024",
-       }],
-    });
+  const generatedThumbnail = await context.run(
+    "generate-thumbnail",
+    async () => {
+      const openai = new OpenAI();
+      const response = await openai.responses.create({
+        model: "gpt-5",
+        input: prompt,
+        tools: [
+          {
+            type: "image_generation",
+            size: "1536x1024",
+          },
+        ],
+      });
 
-    const imageData = response.output
-      .filter((output) => output.type === "image_generation_call")
-      .map((output) => output.result);
-    
-    if (imageData.length > 0) {
+      console.dir({ response }, { depth: null });
+
+      const imageData = response.output
+        .filter((output) => output.type === "image_generation_call")
+        .map((output) => output.result);
+
+      if (imageData.length <= 0) {
+        throw new Error("No image data received from OpenAI");
+      }
+
       const imageBase64 = imageData[0];
-   
+      if (!imageBase64) {
+        throw new Error("No image data received from OpenAI");
+      }
+
+      return base64ToFile(imageBase64, "thumbnail.png");
+    }
+  );
+
+  console.log({ generatedThumbnail });
+
+  await context.run("cleanup-thumbnail", async () => {
+    if (video.thumbnailKey) {
+      await utapi.deleteFiles(video.thumbnailKey);
+      await db
+        .update(videos)
+        .set({ thumbnailKey: null, thumbnailUrl: null })
+        .where(and(eq(videos.id, videoId), eq(videos.userId, userId)));
     }
   });
 
-  await context.run("update-video", async () => {
-    const title = body.choices[0]?.message.content;
+  const uploadedThumbnailUrl = await context.run(
+    "upload-thumbnail",
+    async () => {
+      const { data, error } = await utapi.uploadFiles(generatedThumbnail);
 
-    if (!title) {
-      throw new Error("Bad request");
+      if (error) {
+        throw new Error(error.message);
+      }
+
+      if (!data) {
+        throw new Error("Bad request");
+      }
+
+      return data;
     }
+  );
 
+  await context.run("update-video", async () => {
     await db
       .update(videos)
       .set({
-        title: title || videos.title,
+        thumbnailKey: uploadedThumbnailUrl.key,
+        thumbnailUrl: uploadedThumbnailUrl.ufsUrl,
       })
       .where(and(eq(videos.id, videoId), eq(videos.userId, userId)));
   });

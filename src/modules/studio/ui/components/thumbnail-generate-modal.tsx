@@ -37,13 +37,13 @@ export const ThumbnailGenerateModal = ({
     },
   });
 
- 
-
   const generateThumbnail = trpc.videos.generateThumbnail.useMutation({
     onSuccess: () => {
       toast.success("Background job started", {
         description: "This may take some time.",
       });
+      form.reset();
+      onOpenChange(false);
     },
     onError: () => {
       toast.error("Something went wrong");
@@ -78,6 +78,7 @@ export const ThumbnailGenerateModal = ({
                     cols={30}
                     rows={5}
                     placeholder="A description of wanted thumbnail"
+                    disabled={generateThumbnail.isPending}
                   />
                 </FormControl>
                 <FormMessage />
@@ -85,7 +86,9 @@ export const ThumbnailGenerateModal = ({
             )}
           />
           <div className="flex justify-end">
-            <Button type="submit">Generate</Button>
+            <Button type="submit" disabled={generateThumbnail.isPending}>
+              Generate
+            </Button>
           </div>
         </form>
       </Form>
