@@ -54,7 +54,7 @@ export const VideoReactions = ({
         onClick={() => like.mutate({ videoId })}
         disabled={like.isPending || dislike.isPending}
         variant="secondary"
-        className="rounded-l-full rounded-r-none gap-2 pr-4 cursor-pointer"
+        className="rounded-l-full rounded-r-none gap-2 pr-4"
       >
         <ThumbsUpIcon
           className={cn("size-5", viewerReaction === "like" && "fill-black")}
@@ -66,7 +66,7 @@ export const VideoReactions = ({
         onClick={() => dislike.mutate({ videoId })}
         disabled={like.isPending || dislike.isPending}
         variant="secondary"
-        className="rounded-l-none rounded-r-full gap-2 pl-3 cursor-pointer"
+        className="rounded-l-none rounded-r-full gap-2 pl-3"
       >
         <ThumbsDownIcon
           className={cn("size-5", viewerReaction === "dislike" && "fill-black")}

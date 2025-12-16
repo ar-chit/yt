@@ -51,7 +51,6 @@ export const videoReactionsRouter = createTRPCRouter({
           target: [videoReactions.userId, videoReactions.videoId],
           set: {
             type: "like",
-            updatedAt: new Date(),
           },
         })
         .returning();
@@ -104,7 +103,6 @@ export const videoReactionsRouter = createTRPCRouter({
           target: [videoReactions.userId, videoReactions.videoId],
           set: {
             type: "dislike",
-            updatedAt: new Date(),
           },
         })
         .returning();
