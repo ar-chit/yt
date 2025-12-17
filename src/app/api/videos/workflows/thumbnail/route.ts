@@ -1,8 +1,8 @@
 import { db } from "@/db";
 import { videos } from "@/db/schema";
-import { base64ToFile } from "@/lib/utils";
 import { serve } from "@upstash/workflow/nextjs";
 import { and, eq } from "drizzle-orm";
+import { File } from "node:buffer";
 import OpenAI from "openai";
 import { UTApi } from "uploadthing/server";
 
@@ -30,8 +30,8 @@ export const { POST } = serve(async (context) => {
     return existingVideo;
   });
 
-  const generatedThumbnail = await context.run(
-    "generate-thumbnail",
+  const uploadedThumbnailUrl = await context.run(
+    "uploaded-thumbnail",
     async () => {
       const openai = new OpenAI();
       const response = await openai.responses.create({
@@ -45,26 +45,31 @@ export const { POST } = serve(async (context) => {
         ],
       });
 
-      console.dir({ response }, { depth: null });
+      const imageCall = response.output.find(
+        (o) => o.type === "image_generation_call"
+      );
 
-      const imageData = response.output
-        .filter((output) => output.type === "image_generation_call")
-        .map((output) => output.result);
-
-      if (imageData.length <= 0) {
+      if (!imageCall?.result) {
         throw new Error("No image data received from OpenAI");
       }
 
-      const imageBase64 = imageData[0];
-      if (!imageBase64) {
-        throw new Error("No image data received from OpenAI");
+      const imageBase64 = imageCall.result;
+
+      const buffer = Buffer.from(imageBase64, "base64");
+
+      const file = new File([buffer], "thumbnail.png", {
+        type: "image/png",
+      });
+
+      const { data, error } = await utapi.uploadFiles(file);
+
+      if (error || !data) {
+        throw new Error("Upload failed");
       }
 
-      return base64ToFile(imageBase64, "thumbnail.png");
+      return data;
     }
   );
-
-  console.log({ generatedThumbnail });
 
   await context.run("cleanup-thumbnail", async () => {
     if (video.thumbnailKey) {
@@ -75,23 +80,6 @@ export const { POST } = serve(async (context) => {
         .where(and(eq(videos.id, videoId), eq(videos.userId, userId)));
     }
   });
-
-  const uploadedThumbnailUrl = await context.run(
-    "upload-thumbnail",
-    async () => {
-      const { data, error } = await utapi.uploadFiles(generatedThumbnail);
-
-      if (error) {
-        throw new Error(error.message);
-      }
-
-      if (!data) {
-        throw new Error("Bad request");
-      }
-
-      return data;
-    }
-  );
 
   await context.run("update-video", async () => {
     await db
