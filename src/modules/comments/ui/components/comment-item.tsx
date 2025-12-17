@@ -8,10 +8,14 @@ import {
 import { UserAvatar } from "@/components/user-avatar";
 import { cn } from "@/lib/utils";
 import { CommentsGetManyOutput } from "@/modules/comments/types";
+import { CommentForm } from "@/modules/comments/ui/components/comment-form";
+import { CommentReplies } from "@/modules/comments/ui/components/comment-replies";
 import { trpc } from "@/trpc/client";
 import { useAuth, useClerk } from "@clerk/nextjs";
 import { formatDistanceToNow } from "date-fns";
 import {
+  ChevronDownIcon,
+  ChevronUpIcon,
   MessageSquareIcon,
   MoreVerticalIcon,
   ThumbsDownIcon,
@@ -19,6 +23,7 @@ import {
   Trash2Icon,
 } from "lucide-react";
 import Link from "next/link";
+import { useState } from "react";
 import { toast } from "sonner";
 
 interface CommentItemProps {
@@ -26,8 +31,11 @@ interface CommentItemProps {
 }
 
 export const CommentItem = ({ comment }: CommentItemProps) => {
-  const { userId } = useAuth();
   const clerk = useClerk();
+  const { userId } = useAuth();
+
+  const [isReplyOpen, setIsReplyOpen] = useState(false);
+  const [isRepliesOpen, setIsRepliesOpen] = useState(false);
 
   const utils = trpc.useUtils();
   const remove = trpc.comments.remove.useMutation({
@@ -51,12 +59,12 @@ export const CommentItem = ({ comment }: CommentItemProps) => {
         videoId: comment.videoId,
       });
     },
-    onError: (error) => { 
+    onError: (error) => {
       toast.error("Something went wrong while liking the comment");
       if (error.data?.code === "UNAUTHORIZED") {
         clerk.openSignIn();
       }
-    }
+    },
   });
   const dislike = trpc.commentReactions.dislike.useMutation({
     onSuccess: () => {
@@ -131,6 +139,15 @@ export const CommentItem = ({ comment }: CommentItemProps) => {
                 {comment.dislikeCount}
               </span>
             </div>
+
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-8"
+              onClick={() => setIsReplyOpen(true)}
+            >
+              Reply
+            </Button>
           </div>
         </div>
         <DropdownMenu modal={false}>
@@ -140,10 +157,11 @@ export const CommentItem = ({ comment }: CommentItemProps) => {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => {}}>
+            <DropdownMenuItem onClick={() => setIsReplyOpen(true)}>
               <MessageSquareIcon className="size-4" />
               Reply
             </DropdownMenuItem>
+
             {comment.user.clerkId === userId && (
               <DropdownMenuItem
                 onClick={() => remove.mutate({ id: comment.id })}
@@ -155,6 +173,35 @@ export const CommentItem = ({ comment }: CommentItemProps) => {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+      {isReplyOpen && (
+        <div className="mt-4 pl-14">
+          <CommentForm
+            parentId={comment.id}
+            variant="reply"
+            videoId={comment.videoId}
+            onCancel={() => setIsReplyOpen(false)}
+            onSuccess={() => {
+              setIsReplyOpen(false);
+              setIsRepliesOpen(true);
+            }}
+          />
+        </div>
+      )}
+      {comment.replyCount > 0 && (
+        <div className="pl-14">
+          <Button
+            variant="tertiary"
+            size="sm"
+            onClick={() => setIsRepliesOpen((current) => !current)}
+          >
+            {isRepliesOpen ? <ChevronUpIcon /> : <ChevronDownIcon />}
+            {comment.replyCount} replies
+          </Button>
+        </div>
+      )}
+      {comment.replyCount > 0 && isRepliesOpen && (
+        <CommentReplies parentId={comment.id} videoId={comment.videoId} />
+      )}
     </div>
   );
 };
