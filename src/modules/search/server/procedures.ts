@@ -1,15 +1,16 @@
+import { and, desc, eq, getTableColumns, ilike, lt, or } from "drizzle-orm";
+import { z } from "zod";
+
 import { db } from "@/db";
 import { users, videoReactions, videos, videoViews } from "@/db/schema";
 import { baseProcedure, createTRPCRouter } from "@/trpc/init";
-import { TRPCError } from "@trpc/server";
-import { and, desc, eq, getTableColumns, lt, ne, or } from "drizzle-orm";
-import { z } from "zod";
 
-export const suggestionsRouter = createTRPCRouter({
+export const searchRouter = createTRPCRouter({
   getMany: baseProcedure
     .input(
       z.object({
-        videoId: z.uuid(),
+        q: z.string().nullish(),
+        categoryId: z.uuid().nullish(),
         cursor: z
           .object({
             id: z.uuid(),
@@ -20,18 +21,7 @@ export const suggestionsRouter = createTRPCRouter({
       })
     )
     .query(async ({ input }) => {
-      const { cursor, limit, videoId } = input;
-
-      const [existingVideo] = await db
-        .select()
-        .from(videos)
-        .where(eq(videos.id, videoId));
-
-      if (!existingVideo) {
-        throw new TRPCError({
-          code: "NOT_FOUND",
-        });
-      }
+      const { cursor, limit, q, categoryId } = input;
 
       const data = await db
         .select({
@@ -57,11 +47,8 @@ export const suggestionsRouter = createTRPCRouter({
         .innerJoin(users, eq(users.id, videos.userId))
         .where(
           and(
-            ne(videos.id, existingVideo.id),
-            eq(videos.visibility, "public"),
-            existingVideo.categoryId
-              ? eq(videos.categoryId, existingVideo.categoryId)
-              : undefined,
+            ilike(videos.title, `%${q}%`),
+            categoryId ? eq(videos.categoryId, categoryId) : undefined,
             cursor
               ? or(
                   lt(videos.updatedAt, cursor.updatedAt),
